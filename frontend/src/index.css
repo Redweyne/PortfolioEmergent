@@ -1,115 +1,236 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Sci-Fi Dark Theme */
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #121212;
+  --bg-card: rgba(0, 255, 209, 0.03);
+  
+  /* Neon Cyan Accent */
+  --neon-primary: #00FFD1;
+  --neon-secondary: #00E5BB;
+  --neon-glow: rgba(0, 255, 209, 0.4);
+  --neon-subtle: rgba(0, 255, 209, 0.1);
+  
+  /* Text Colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --text-dark: #000000;
+  
+  /* Borders */
+  --border-subtle: rgba(0, 255, 209, 0.15);
+  --border-medium: rgba(0, 255, 209, 0.3);
+  --border-bright: rgba(0, 255, 209, 0.6);
+  
+  /* Gradients */
+  --gradient-cyber: linear-gradient(135deg, rgba(0, 255, 209, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-    margin: 0;
-    font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-        sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-code {
-    font-family:
-        source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-@layer base {
-    :root {
-        --background: 0 0% 100%;
-        --foreground: 0 0% 3.9%;
-        --card: 0 0% 100%;
-        --card-foreground: 0 0% 3.9%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 3.9%;
-        --primary: 0 0% 9%;
-        --primary-foreground: 0 0% 98%;
-        --secondary: 0 0% 96.1%;
-        --secondary-foreground: 0 0% 9%;
-        --muted: 0 0% 96.1%;
-        --muted-foreground: 0 0% 45.1%;
-        --accent: 0 0% 96.1%;
-        --accent-foreground: 0 0% 9%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 89.8%;
-        --input: 0 0% 89.8%;
-        --ring: 0 0% 3.9%;
-        --chart-1: 12 76% 61%;
-        --chart-2: 173 58% 39%;
-        --chart-3: 197 37% 24%;
-        --chart-4: 43 74% 66%;
-        --chart-5: 27 87% 67%;
-        --radius: 0.5rem;
-    }
-    .dark {
-        --background: 0 0% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 0 0% 3.9%;
-        --card-foreground: 0 0% 98%;
-        --popover: 0 0% 3.9%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 0 0% 98%;
-        --primary-foreground: 0 0% 9%;
-        --secondary: 0 0% 14.9%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 0 0% 14.9%;
-        --muted-foreground: 0 0% 63.9%;
-        --accent: 0 0% 14.9%;
-        --accent-foreground: 0 0% 98%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 14.9%;
-        --input: 0 0% 14.9%;
-        --ring: 0 0% 83.1%;
-        --chart-1: 220 70% 50%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
-    }
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
 }
 
-@layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
+::-webkit-scrollbar-thumb {
+  background: var(--neon-primary);
+  border-radius: 3px;
 }
 
-@layer base {
-    [data-debug-wrapper="true"] {
-        display: contents !important;
-    }
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-secondary);
+}
 
-    [data-debug-wrapper="true"] > * {
-        margin-left: inherit;
-        margin-right: inherit;
-        margin-top: inherit;
-        margin-bottom: inherit;
-        padding-left: inherit;
-        padding-right: inherit;
-        padding-top: inherit;
-        padding-bottom: inherit;
-        column-gap: inherit;
-        row-gap: inherit;
-        gap: inherit;
-        border-left-width: inherit;
-        border-right-width: inherit;
-        border-top-width: inherit;
-        border-bottom-width: inherit;
-        border-left-style: inherit;
-        border-right-style: inherit;
-        border-top-style: inherit;
-        border-bottom-style: inherit;
-        border-left-color: inherit;
-        border-right-color: inherit;
-        border-top-color: inherit;
-        border-bottom-color: inherit;
-    }
+/* Selection */
+::selection {
+  background: var(--neon-primary);
+  color: var(--text-dark);
+}
+
+/* Glitch Text Effect */
+@keyframes glitch {
+  0% {
+    clip-path: inset(40% 0 61% 0);
+    transform: translate(-2px, 2px);
+  }
+  20% {
+    clip-path: inset(92% 0 1% 0);
+    transform: translate(2px, -2px);
+  }
+  40% {
+    clip-path: inset(43% 0 1% 0);
+    transform: translate(-2px, 2px);
+  }
+  60% {
+    clip-path: inset(25% 0 58% 0);
+    transform: translate(2px, -2px);
+  }
+  80% {
+    clip-path: inset(54% 0 7% 0);
+    transform: translate(-2px, 2px);
+  }
+  100% {
+    clip-path: inset(58% 0 43% 0);
+    transform: translate(2px, -2px);
+  }
+}
+
+@keyframes glitch2 {
+  0% {
+    clip-path: inset(65% 0 15% 0);
+    transform: translate(2px, -2px);
+  }
+  20% {
+    clip-path: inset(10% 0 75% 0);
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    clip-path: inset(80% 0 5% 0);
+    transform: translate(2px, -2px);
+  }
+  60% {
+    clip-path: inset(15% 0 65% 0);
+    transform: translate(-2px, 2px);
+  }
+  80% {
+    clip-path: inset(55% 0 25% 0);
+    transform: translate(2px, -2px);
+  }
+  100% {
+    clip-path: inset(25% 0 55% 0);
+    transform: translate(-2px, 2px);
+  }
+}
+
+/* Scanline Effect */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+/* Pulse Glow */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--neon-glow), 0 0 40px rgba(0, 255, 209, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px var(--neon-glow), 0 0 60px rgba(0, 255, 209, 0.3);
+  }
+}
+
+/* Text Flicker */
+@keyframes text-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 10px var(--neon-primary), 0 0 20px var(--neon-primary), 0 0 40px var(--neon-primary);
+  }
+  20%, 24%, 55% {
+    opacity: 0.8;
+    text-shadow: none;
+  }
+}
+
+/* Cyber Grid Pattern */
+.cyber-grid {
+  background-image: 
+    linear-gradient(rgba(0, 255, 209, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 209, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Terminal Cursor */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.terminal-cursor::after {
+  content: '_';
+  animation: blink 1s infinite;
+  color: var(--neon-primary);
+}
+
+/* Holographic Effect */
+@keyframes hologram {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Float Animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Utility Classes */
+.text-neon {
+  color: var(--neon-primary);
+}
+
+.bg-neon {
+  background-color: var(--neon-primary);
+}
+
+.border-neon {
+  border-color: var(--border-medium);
+}
+
+.glow-neon {
+  box-shadow: 0 0 20px var(--neon-glow);
+}
+
+.text-glow {
+  text-shadow: 0 0 10px var(--neon-primary), 0 0 20px var(--neon-primary);
+}
+
+/* Orbitron Font for Headers */
+.font-cyber {
+  font-family: 'Orbitron', sans-serif;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
 }
