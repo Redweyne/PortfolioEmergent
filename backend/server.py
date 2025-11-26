@@ -1,6 +1,7 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 import os
 import logging
 import smtplib
@@ -8,6 +9,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
+from typing import Optional
 from datetime import datetime, timezone
 from collections import defaultdict
 import time
@@ -44,8 +46,8 @@ class ContactMessageCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
     message: str = Field(..., min_length=1, max_length=5000)
-    website: str = Field(default="", max_length=0)
-    phone_confirm: str = Field(default="", max_length=0)
+    website: Optional[str] = Field(default=None, max_length=256)
+    phone_confirm: Optional[str] = Field(default=None, max_length=256)
 
 class ContactResponse(BaseModel):
     success: bool
@@ -106,19 +108,15 @@ async def root():
 async def submit_contact_message(input: ContactMessageCreate, request: Request):
     """Submit a contact form message - sends email directly"""
     
-    client_host = request.client.host if request.client else "unknown"
+    client_ip = request.client.host if request.client else "unknown"
     
     if input.website or input.phone_confirm:
-        logger.warning(f"Honeypot triggered from IP: {client_host}")
+        logger.warning(f"Honeypot triggered from IP: {client_ip}")
         await asyncio.sleep(2)
         return ContactResponse(
             success=True,
             message="Message sent successfully! I'll get back to you soon."
         )
-    
-    client_ip = request.headers.get("X-Forwarded-For", client_host)
-    if isinstance(client_ip, str) and "," in client_ip:
-        client_ip = client_ip.split(",")[0].strip()
     
     if not check_rate_limit(client_ip):
         logger.warning(f"Rate limit exceeded for IP: {client_ip}")
@@ -163,3 +161,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+TRUSTED_PROXIES = os.environ.get('TRUSTED_PROXIES', '127.0.0.1,::1').split(',')
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=TRUSTED_PROXIES)

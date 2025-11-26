@@ -55,6 +55,7 @@ SMTP_EMAIL=your-gmail@gmail.com
 SMTP_PASSWORD=your-app-password
 RECIPIENT_EMAIL=your-email@example.com
 CORS_ORIGINS=https://yourdomain.com
+TRUSTED_PROXIES=127.0.0.1,::1
 EOF
 
 # Test the backend
@@ -171,9 +172,9 @@ pm2 restart redweyne-backend
 
 The backend includes:
 
-1. **Honeypot Fields**: Hidden form fields (`website` and `phone_confirm`) that bots fill out but humans don't see. If filled, the submission is silently ignored.
+1. **Honeypot Fields**: Hidden form fields (`website` and `phone_confirm`) that bots fill out but humans don't see. If filled, the submission is silently accepted (returns 201) but the email is not sent. This prevents bots from detecting that they've been caught.
 
-2. **Rate Limiting**: Max 5 contact form submissions per IP per hour. Adjust `MAX_REQUESTS_PER_HOUR` in server.py if needed.
+2. **Rate Limiting**: Max 5 contact form submissions per IP per hour. Adjust `MAX_REQUESTS_PER_HOUR` in server.py if needed. The backend uses `ProxyHeadersMiddleware` to correctly identify client IPs when behind Nginx. Set `TRUSTED_PROXIES=127.0.0.1,::1` in your .env file (already configured in the setup above).
 
 3. **Nginx Rate Limiting**: 10 requests per second to API endpoints with burst of 20.
 
