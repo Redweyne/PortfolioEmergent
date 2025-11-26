@@ -54,7 +54,7 @@ cat > .env << EOF
 SMTP_EMAIL=your-gmail@gmail.com
 SMTP_PASSWORD=your-app-password
 RECIPIENT_EMAIL=your-email@example.com
-CORS_ORIGINS=https://yourdomain.com
+CORS_ORIGINS=https://redweyne.com,https://www.redweyne.com
 TRUSTED_PROXIES=127.0.0.1,::1
 EOF
 
@@ -81,7 +81,8 @@ npm run build
 # Copy nginx config
 sudo cp /var/www/redweyne-portfolio/deploy/nginx.conf /etc/nginx/sites-available/redweyne
 
-# Edit the config - replace yourdomain.com with your actual domain
+# The config is already set up for redweyne.com
+# Review and adjust if needed:
 sudo nano /etc/nginx/sites-available/redweyne
 
 # Enable the site
@@ -105,7 +106,7 @@ sudo systemctl reload nginx
 
 ```bash
 # Get SSL certificate (make sure your domain points to your server first)
-sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+sudo certbot --nginx -d redweyne.com -d www.redweyne.com
 
 # Auto-renewal is set up automatically
 ```

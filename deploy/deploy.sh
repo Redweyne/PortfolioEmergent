@@ -6,7 +6,7 @@
 set -e
 
 PROJECT_DIR="/var/www/redweyne-portfolio"
-DOMAIN="yourdomain.com"
+DOMAIN="redweyne.com"
 
 echo "==================================="
 echo "  Redweyne Portfolio Deployment"

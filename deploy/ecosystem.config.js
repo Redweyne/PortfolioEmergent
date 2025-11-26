@@ -3,9 +3,9 @@ module.exports = {
     {
       name: 'redweyne-backend',
       cwd: '/var/www/redweyne-portfolio/backend',
-      script: 'uvicorn',
-      args: 'server:app --host 127.0.0.1 --port 8000',
-      interpreter: 'python3',
+      script: 'venv/bin/gunicorn',
+      args: '--bind 127.0.0.1:8000 --workers 4 --worker-class uvicorn.workers.UvicornWorker server:app',
+      interpreter: 'none',
       env: {
         NODE_ENV: 'production',
       },

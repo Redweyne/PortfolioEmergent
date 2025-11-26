@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: redweyne-portfolio
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - SMTP_EMAIL=${SMTP_EMAIL}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - RECIPIENT_EMAIL=${RECIPIENT_EMAIL:-redweynemk@gmail.com}
+      - CORS_ORIGINS=https://redweyne.com,https://www.redweyne.com
+      - TRUSTED_PROXIES=127.0.0.1,::1
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
