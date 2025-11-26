@@ -80,7 +80,7 @@ const Hero = () => {
 
             {/* Description */}
             <p className="font-mono text-base leading-relaxed text-[rgba(255,255,255,0.6)] max-w-lg border-l-2 border-[rgba(0,255,209,0.3)] pl-4">
-              {personalInfo.bio.slice(0, 200)}...
+              {personalInfo.heroStatement}
             </p>
 
             {/* CTA Buttons */}
