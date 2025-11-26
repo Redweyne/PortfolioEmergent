@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { personalInfo, socialLinks } from '../data/mock';
-import { Send, Mail, Github, Linkedin, CheckCircle, Loader2, MessageSquare } from 'lucide-react';
+import { Send, Mail, Github, Linkedin, CheckCircle, Loader2, MessageSquare, AlertCircle } from 'lucide-react';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -13,27 +17,35 @@ const Contact = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }));
+    // Clear error when user starts typing
+    if (error) setError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     
-    // Simulate form submission (mock)
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({ name: '', email: '', message: '' });
-    
-    // Reset success state after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+    try {
+      await axios.post(`${API}/contact`, formData);
+      setIsSubmitted(true);
+      setFormData({ name: '', email: '', message: '' });
+      
+      // Reset success state after 5 seconds
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch (err) {
+      console.error('Error submitting contact form:', err);
+      setError('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getIcon = (iconName) => {
