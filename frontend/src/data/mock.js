@@ -17,12 +17,12 @@ export const projects = [
     id: 1,
     name: "INBOX_AI",
     codename: "PROJECT::NEURAL_MAIL",
-    description: "An intelligent email management platform powered by AI that helps you organize, prioritize, and respond to emails efficiently. Features smart categorization, AI-generated summaries, and automated responses.",
+    description: "Email overwhelm is real—hundreds of messages, buried priorities, hours wasted. INBOX_AI doesn't just organize your inbox; it thinks for you. AI-generated summaries cut through noise, smart categorization learns your patterns, and automated responses handle the repetitive stuff so you can focus on what actually matters.",
     features: [
-      "AI-powered email summaries",
-      "Smart inbox categorization",
-      "Automated response suggestions",
-      "Priority detection algorithms"
+      "Summarizes 50+ email threads in seconds",
+      "Priority scoring that learns your workflow",
+      "One-click smart replies for routine messages",
+      "Dashboard analytics to reclaim your time"
     ],
     tech: ["React", "TypeScript", "AI/ML", "Node.js", "PostgreSQL"],
     status: "OPERATIONAL",
@@ -32,16 +32,32 @@ export const projects = [
     id: 2,
     name: "TEMP_MAIL",
     codename: "PROJECT::GHOST_PROTOCOL",
-    description: "A secure temporary email service that protects your privacy. Generate disposable email addresses instantly for testing, signups, and avoiding spam. Built with security and user experience in mind.",
+    description: "Every signup form is a data grab. Every newsletter is a commitment. TEMP_MAIL gives you throwaway addresses that self-destruct—no registration, no trace, no spam reaching your real inbox. Built for developers testing email flows and anyone tired of giving away their identity for a PDF.",
     features: [
-      "Instant email generation",
-      "Real-time inbox updates",
-      "Privacy-focused architecture",
-      "Zero registration required"
+      "Auto-expiring aliases with custom TTL",
+      "SendGrid-powered delivery (100+ emails/day)",
+      "Full HTML & attachment support",
+      "Zero-trace cleanup on expiry"
     ],
     tech: ["React", "TypeScript", "WebSocket", "Express", "Redis"],
     status: "ACTIVE",
     link: "https://redweyne.com/tempmail"
+  },
+  {
+    id: 3,
+    name: "[ CLASSIFIED ]",
+    codename: "PROJECT::PHANTOM_LINK",
+    description: "Some projects aren't ready to see the light. This one's deep in the lab—encrypted comms, decentralized architecture, zero-knowledge proofs. When it surfaces, it'll redefine how you think about digital ownership. Until then, the specs remain sealed.",
+    features: [
+      "[ REDACTED ] encryption protocol",
+      "Decentralized node architecture",
+      "Zero-knowledge identity layer",
+      "Launch: Q2 2025"
+    ],
+    tech: ["Rust", "WebAssembly", "Cryptography", "P2P", "???"],
+    status: "CLASSIFIED",
+    link: null,
+    isClassified: true
   }
 ];
 
