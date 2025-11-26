@@ -1,7 +1,7 @@
 # Redweyne Sci-Fi Portfolio
 
 ## Overview
-A modern, sci-fi themed portfolio website built with React and FastAPI. Features a cyberpunk aesthetic with 3D Spline graphics, smooth animations, and a contact form system.
+A modern, sci-fi themed portfolio website built with React and FastAPI. Features a cyberpunk aesthetic with 3D Spline graphics, smooth animations, and a contact form that sends messages directly to your email.
 
 ## Project Structure
 ```
@@ -22,7 +22,7 @@ A modern, sci-fi themed portfolio website built with React and FastAPI. Features
 │   └── package.json
 │
 ├── backend/            # FastAPI backend (port 8000)
-│   ├── server.py       # API endpoints
+│   ├── server.py       # API endpoints (email sending)
 │   └── requirements.txt
 │
 └── tests/
@@ -30,21 +30,38 @@ A modern, sci-fi themed portfolio website built with React and FastAPI. Features
 
 ## Technologies
 - **Frontend**: React 19, TailwindCSS, Radix UI, Spline 3D, Lucide Icons
-- **Backend**: FastAPI, Motor (async MongoDB), Pydantic
+- **Backend**: FastAPI, Gmail SMTP
 - **Build Tool**: CRACO (Create React App Configuration Override)
 
 ## Environment Variables
 
 ### Frontend (.env)
 - `REACT_APP_BACKEND_URL` - Backend API URL
-- `WDS_SOCKET_PORT` - WebSocket port for dev server
-- `REACT_APP_ENABLE_VISUAL_EDITS` - Enable visual editing (false)
-- `ENABLE_HEALTH_CHECK` - Enable health check endpoint (false)
 
-### Backend (Required for contact form)
-- `MONGO_URL` - MongoDB connection string
-- `DB_NAME` - Database name
+### Backend (.env)
+- `SMTP_EMAIL` - Your Gmail address for sending emails
+- `SMTP_PASSWORD` - Gmail App Password (NOT your regular password)
+- `RECIPIENT_EMAIL` - Where to receive contact messages (default: redweynemk@gmail.com)
 - `CORS_ORIGINS` - Allowed origins (default: *)
+
+## Setting Up Gmail for Contact Form
+
+### Step 1: Enable 2-Factor Authentication
+1. Go to your Google Account settings
+2. Security → 2-Step Verification → Turn ON
+
+### Step 2: Create an App Password
+1. Go to: https://myaccount.google.com/apppasswords
+2. Select "Mail" and your device
+3. Click "Generate"
+4. Copy the 16-character password (no spaces needed)
+
+### Step 3: Set Environment Variables
+```
+SMTP_EMAIL=your-gmail@gmail.com
+SMTP_PASSWORD=abcd efgh ijkl mnop  (your app password)
+RECIPIENT_EMAIL=redweynemk@gmail.com
+```
 
 ## Running Locally
 
@@ -53,47 +70,31 @@ A modern, sci-fi themed portfolio website built with React and FastAPI. Features
 cd frontend && PORT=5000 npm start
 ```
 
-### Backend (when MongoDB is configured)
+### Backend
 ```bash
 cd backend && uvicorn server:app --host localhost --port 8000
 ```
 
 ## API Endpoints
-- `POST /api/contact` - Submit contact form
-- `GET /api/contact` - Get all messages (admin)
-- `GET /api/status` - Health check
-
-## Deployment Notes
-- Frontend binds to 0.0.0.0:5000
-- Backend binds to localhost:8000
-- 3D Spline graphics require WebGL support
-- Contact form requires MongoDB database
+- `POST /api/contact` - Submit contact form (sends email)
+- `GET /api/health` - Health check with SMTP status
+- `GET /api/` - Basic API info
 
 ## VPS Deployment Guide
 
 ### Prerequisites
 - Node.js 20+
 - Python 3.11+
-- MongoDB (local or Atlas)
 - Nginx (recommended for production)
 
-### Step 1: Set Up MongoDB
-Install MongoDB on your VPS or use MongoDB Atlas:
-```bash
-# Local MongoDB
-sudo apt install mongodb
-sudo systemctl start mongodb
-
-# Or use MongoDB Atlas connection string
-```
-
-### Step 2: Environment Variables
+### Step 1: Environment Variables
 Create environment files:
 
 **Backend** (`backend/.env`):
 ```
-MONGO_URL=mongodb://localhost:27017  # or your Atlas URL
-DB_NAME=portfolio_db
+SMTP_EMAIL=your-gmail@gmail.com
+SMTP_PASSWORD=your-app-password
+RECIPIENT_EMAIL=redweynemk@gmail.com
 CORS_ORIGINS=https://yourdomain.com
 ```
 
@@ -102,27 +103,26 @@ CORS_ORIGINS=https://yourdomain.com
 REACT_APP_BACKEND_URL=https://yourdomain.com
 ```
 
-### Step 3: Build Frontend
+### Step 2: Build Frontend
 ```bash
 cd frontend
 npm install
 npm run build
 ```
 
-### Step 4: Start Backend
+### Step 3: Start Backend
 ```bash
 cd backend
 pip install -r requirements.txt
 uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
-For production, use with systemd or PM2:
+For production, use PM2:
 ```bash
-# Using PM2
 pm2 start "uvicorn server:app --host 0.0.0.0 --port 8000" --name portfolio-api
 ```
 
-### Step 5: Nginx Configuration
+### Step 4: Nginx Configuration
 ```nginx
 server {
     listen 80;
@@ -144,13 +144,12 @@ server {
 ```
 
 ### Health Check
-Test your deployment:
 ```bash
-curl https://yourdomain.com/api/
-# Should return: {"message": "Hello World"}
+curl https://yourdomain.com/api/health
 ```
 
 ## Recent Changes
+- 2024-11-26: Replaced MongoDB with Gmail SMTP for contact form
 - 2024-11-26: Added error boundary for Spline/WebGL failures
 - 2024-11-26: Configured for Replit environment (port 5000, allowedHosts)
 - 2024-11-26: Added VPS deployment documentation
