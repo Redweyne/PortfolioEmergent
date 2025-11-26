@@ -260,7 +260,7 @@ const Contact = () => {
                 <br />
                 <span className="text-[#00FFD1]">&gt;</span> privacy-first platforms, and elegant web solutions.
                 <br />
-                <span className="text-[#00FFD1]">&gt;</span> Let's discuss your project<span className="animate-pulse">_</span>
+                <span className="text-[#00FFD1]">&gt;</span> Let&apos;s discuss your project<span className="animate-pulse">_</span>
               </div>
             </div>
           </div>
