@@ -4,7 +4,7 @@ export const personalInfo = {
   name: "REDWEYNE",
   title: "Digital Architect",
   tagline: "Crafting Exceptional Digital Experiences",
-  email: "hello@redweyne.com",
+  email: "redweynemk@gmail.com",
   heroStatement: "You have a vision. I have the obsession to make it real. Let's build something the internet hasn't seen yet.",
   bio: "Who I am matters far less than what I can build for you. Forget the resume, the credentials, the carefully curated story—what you're really here for is someone who can take the chaos in your head and turn it into something that actually works. Something that makes people stop scrolling. Something that solves the problem you couldn't articulate until you saw it solved.",
   philosophy: "I operate on a simple belief: the world doesn't need another developer. It needs someone obsessed enough to lose sleep over a button's placement, paranoid enough to anticipate the edge case you haven't imagined yet, and stubborn enough to rebuild something five times until it feels inevitable. Your project isn't a transaction to me—it's a proving ground. And I don't show up to participate. I show up to leave a mark.",
@@ -94,5 +94,5 @@ export const stats = [
 export const socialLinks = [
   { name: "GitHub", url: "https://github.com/redweyne", icon: "Github" },
   { name: "LinkedIn", url: "https://linkedin.com/in/redweyne", icon: "Linkedin" },
-  { name: "Email", url: "mailto:hello@redweyne.com", icon: "Mail" }
+  { name: "Email", url: "mailto:redweynemk@gmail.com", icon: "Mail" }
 ];
