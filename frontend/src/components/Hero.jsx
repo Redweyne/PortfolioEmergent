@@ -1,10 +1,36 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, Component } from 'react';
 import GlitchText from './GlitchText';
 import { personalInfo, stats } from '../data/mock';
 import { ArrowDown, ChevronRight } from 'lucide-react';
 
 // Lazy load Spline for better performance
 const Spline = lazy(() => import('@splinetool/react-spline'));
+
+// Error boundary for Spline (handles WebGL failures gracefully)
+class SplineErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[rgba(0,255,209,0.05)] to-transparent">
+          <div className="text-center space-y-4">
+            <div className="font-mono text-[#00FFD1] text-xl">3D_INTERFACE</div>
+            <div className="font-mono text-[rgba(255,255,255,0.5)] text-sm">RENDERING_DISABLED</div>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const Hero = () => {
   const scrollToProjects = () => {
@@ -93,13 +119,15 @@ const Hero = () => {
           <div className="relative hidden lg:block">
             <div className="absolute -inset-4 bg-gradient-to-r from-transparent via-[rgba(0,255,209,0.1)] to-transparent blur-3xl opacity-30" />
             <div className="relative w-full h-[700px] overflow-visible">
-              <Suspense fallback={
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="font-mono text-[#00FFD1] animate-pulse">LOADING_3D_INTERFACE...</div>
-                </div>
-              }>
-                <Spline scene="https://prod.spline.design/NbVmy6DPLhY-5Lvg/scene.splinecode" />
-              </Suspense>
+              <SplineErrorBoundary>
+                <Suspense fallback={
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="font-mono text-[#00FFD1] animate-pulse">LOADING_3D_INTERFACE...</div>
+                  </div>
+                }>
+                  <Spline scene="https://prod.spline.design/NbVmy6DPLhY-5Lvg/scene.splinecode" />
+                </Suspense>
+              </SplineErrorBoundary>
             </div>
           </div>
         </div>
