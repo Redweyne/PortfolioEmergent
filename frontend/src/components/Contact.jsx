@@ -181,6 +181,14 @@ const Contact = () => {
                   </span>
                 )}
               </Button>
+
+              {/* Error Message */}
+              {error && (
+                <div className="flex items-center gap-2 p-3 border border-red-500/50 bg-red-500/10 text-red-400 font-mono text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+              )}
             </form>
           </div>
 
