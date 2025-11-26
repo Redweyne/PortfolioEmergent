@@ -83,6 +83,42 @@ async def get_status_checks():
     
     return status_checks
 
+
+# Contact Form Endpoints
+@api_router.post("/contact", response_model=ContactMessage, status_code=201)
+async def submit_contact_message(input: ContactMessageCreate):
+    """Submit a contact form message"""
+    try:
+        contact_obj = ContactMessage(
+            name=input.name,
+            email=input.email,
+            message=input.message
+        )
+        
+        # Convert to dict and serialize datetime for MongoDB
+        doc = contact_obj.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        
+        await db.contact_messages.insert_one(doc)
+        logger.info(f"Contact message received from {input.email}")
+        return contact_obj
+    except Exception as e:
+        logger.error(f"Error saving contact message: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save message")
+
+
+@api_router.get("/contact", response_model=List[ContactMessage])
+async def get_contact_messages():
+    """Get all contact messages (admin endpoint)"""
+    messages = await db.contact_messages.find({}, {"_id": 0}).to_list(1000)
+    
+    # Convert ISO string timestamps back to datetime objects
+    for msg in messages:
+        if isinstance(msg.get('created_at'), str):
+            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
+    
+    return messages
+
 # Include the router in the main app
 app.include_router(api_router)
 
