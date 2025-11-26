@@ -5,8 +5,8 @@ export const personalInfo = {
   title: "Digital Architect",
   tagline: "Crafting Exceptional Digital Experiences",
   email: "hello@redweyne.com",
-  bio: "I don't just write code—I architect digital experiences that transform how you work and interact online. Every project I touch is an opportunity to push boundaries, whether it's developing AI-powered tools that intelligently manage thousands of emails or creating privacy-first platforms that put control back in users' hands.",
-  philosophy: "The web is saturated with mediocre applications that merely function. I build solutions that excel—combining cutting-edge technology with ruthless attention to user experience. My approach is simple: understand the core problem, eliminate unnecessary complexity, and deliver results that speak louder than promises.",
+  bio: "Who I am matters far less than what I can build for you. Forget the resume, the credentials, the carefully curated story—what you're really here for is someone who can take the chaos in your head and turn it into something that actually works. Something that makes people stop scrolling. Something that solves the problem you couldn't articulate until you saw it solved.",
+  philosophy: "I operate on a simple belief: the world doesn't need another developer. It needs someone obsessed enough to lose sleep over a button's placement, paranoid enough to anticipate the edge case you haven't imagined yet, and stubborn enough to rebuild something five times until it feels inevitable. Your project isn't a transaction to me—it's a proving ground. And I don't show up to participate. I show up to leave a mark.",
   availability: "Available for Projects",
   responseTime: "Usually responds within 24 hours"
 };
