@@ -82,7 +82,7 @@ if (config.enableVisualEdits) {
 
 // Setup dev server with visual edits and/or health check
 webpackConfig.devServer = (devServerConfig) => {
-  // Critical for Replit: Allow all hosts and bind to 0.0.0.0:5000
+  // Allow all hosts and bind to 0.0.0.0:5000
   devServerConfig.allowedHosts = 'all';
   devServerConfig.host = '0.0.0.0';
   devServerConfig.port = 5000;
