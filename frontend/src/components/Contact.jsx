@@ -13,7 +13,9 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    message: ''
+    message: '',
+    website: '',
+    phone_confirm: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -36,7 +38,7 @@ const Contact = () => {
     try {
       await axios.post(`${API}/contact`, formData);
       setIsSubmitted(true);
-      setFormData({ name: '', email: '', message: '' });
+      setFormData({ name: '', email: '', message: '', website: '', phone_confirm: '' });
       
       // Reset success state after 5 seconds
       setTimeout(() => setIsSubmitted(false), 5000);
@@ -109,6 +111,28 @@ const Contact = () => {
               <div className="font-mono text-xs text-[rgba(0,255,209,0.6)] mb-4">
                 {'// fill in transmission details'}
               </div>
+
+              {/* Honeypot fields - hidden from real users, catches bots */}
+              <input
+                type="text"
+                name="website"
+                value={formData.website}
+                onChange={handleChange}
+                style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
+              <input
+                type="text"
+                name="phone_confirm"
+                value={formData.phone_confirm}
+                onChange={handleChange}
+                style={{ position: 'absolute', left: '-9999px', opacity: 0 }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
 
               <div className="space-y-2">
                 <label className="font-mono text-xs tracking-wider text-[rgba(255,255,255,0.5)]">

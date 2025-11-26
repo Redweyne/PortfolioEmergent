@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 import os
@@ -9,6 +9,9 @@ from email.mime.multipart import MIMEMultipart
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime, timezone
+from collections import defaultdict
+import time
+import asyncio
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -22,10 +25,27 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+rate_limit_store = defaultdict(list)
+RATE_LIMIT_WINDOW = 3600
+MAX_REQUESTS_PER_HOUR = 5
+
+def check_rate_limit(ip: str) -> bool:
+    """Check if IP has exceeded rate limit for contact form"""
+    current_time = time.time()
+    rate_limit_store[ip] = [t for t in rate_limit_store[ip] if current_time - t < RATE_LIMIT_WINDOW]
+    
+    if len(rate_limit_store[ip]) >= MAX_REQUESTS_PER_HOUR:
+        return False
+    
+    rate_limit_store[ip].append(current_time)
+    return True
+
 class ContactMessageCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     email: EmailStr
     message: str = Field(..., min_length=1, max_length=5000)
+    website: str = Field(default="", max_length=0)
+    phone_confirm: str = Field(default="", max_length=0)
 
 class ContactResponse(BaseModel):
     success: bool
@@ -83,8 +103,29 @@ async def root():
     return {"message": "Hello World"}
 
 @api_router.post("/contact", response_model=ContactResponse, status_code=201)
-async def submit_contact_message(input: ContactMessageCreate):
+async def submit_contact_message(input: ContactMessageCreate, request: Request):
     """Submit a contact form message - sends email directly"""
+    
+    client_host = request.client.host if request.client else "unknown"
+    
+    if input.website or input.phone_confirm:
+        logger.warning(f"Honeypot triggered from IP: {client_host}")
+        await asyncio.sleep(2)
+        return ContactResponse(
+            success=True,
+            message="Message sent successfully! I'll get back to you soon."
+        )
+    
+    client_ip = request.headers.get("X-Forwarded-For", client_host)
+    if isinstance(client_ip, str) and "," in client_ip:
+        client_ip = client_ip.split(",")[0].strip()
+    
+    if not check_rate_limit(client_ip):
+        logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+        raise HTTPException(
+            status_code=429,
+            detail="Too many messages. Please try again later."
+        )
     
     success = send_email(
         name=input.name,
