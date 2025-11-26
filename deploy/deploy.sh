@@ -61,8 +61,6 @@ npm run build
 echo "[6/8] Configuring Nginx..."
 sudo cp "$PROJECT_DIR/deploy/nginx.conf" "/etc/nginx/sites-available/redweyne"
 
-# Update domain in nginx config
-sudo sed -i "s/yourdomain.com/$DOMAIN/g" "/etc/nginx/sites-available/redweyne"
 
 # Enable site
 sudo ln -sf /etc/nginx/sites-available/redweyne /etc/nginx/sites-enabled/
