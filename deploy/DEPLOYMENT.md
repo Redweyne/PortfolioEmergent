@@ -125,56 +125,57 @@ curl http://localhost:5000/api/health
 
 ---
 
-## Step 7: Configure Nginx
+## Step 7: Configure Nginx (HTTP First)
+
+**IMPORTANT:** We set up HTTP first, then add SSL with certbot.
 
 ```bash
-# Create nginx config
-sudo nano /etc/nginx/sites-available/redweyne
-```
+# Copy the initial HTTP-only config
+sudo cp /var/www/redweyne-portfolio/deploy/nginx-initial.conf /etc/nginx/sites-available/redweyne
 
-**Paste this configuration:**
-```nginx
-server {
-    listen 80;
-    server_name redweyne.com www.redweyne.com;
-    return 301 https://$server_name$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name redweyne.com www.redweyne.com;
-
-    ssl_certificate /etc/letsencrypt/live/redweyne.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/redweyne.com/privkey.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-**Enable and test:**
-```bash
+# Enable the site
 sudo ln -sf /etc/nginx/sites-available/redweyne /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
+
+# Test and reload
 sudo nginx -t
 sudo systemctl reload nginx
+```
+
+**Test it works:**
+```bash
+curl http://localhost/api/health
+# Should return: {"status":"healthy"...}
 ```
 
 ---
 
 ## Step 8: Get SSL Certificate
 
+**Make sure your domain points to your VPS IP first!**
+
 ```bash
 sudo certbot --nginx -d redweyne.com -d www.redweyne.com
 ```
+
+Certbot will automatically update your nginx config with SSL settings.
+
+---
+
+## Step 9: Verify Everything Works
+
+```bash
+# Test the API
+curl https://redweyne.com/api/health
+
+# Check PM2 status
+pm2 status
+
+# View logs if needed
+pm2 logs redweyne-portfolio
+```
+
+Visit `https://redweyne.com` in your browser!
 
 ---
 
@@ -217,4 +218,9 @@ python -c "from server import app; print('OK')"
 ```bash
 sudo tail -f /var/log/nginx/error.log
 sudo nginx -t
+```
+
+**SSL certificate issues:**
+```bash
+sudo certbot renew --dry-run
 ```

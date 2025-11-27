@@ -11,12 +11,6 @@ echo "==================================="
 echo "  Redweyne Portfolio Deployment"
 echo "==================================="
 
-# Check if running as correct user
-if [ "$EUID" -eq 0 ]; then
-    echo "Please run as non-root user with sudo privileges"
-    exit 1
-fi
-
 # Update system
 echo "[1/7] Updating system packages..."
 sudo apt update && sudo apt upgrade -y
@@ -32,6 +26,16 @@ sudo apt install -y nginx python3-pip python3-venv certbot python3-certbot-nginx
 
 # Install PM2
 sudo npm install -g pm2
+
+# Set ownership if running as root
+if [ "$EUID" -eq 0 ]; then
+    echo "Running as root - setting up proper permissions..."
+    # Create a deploy user if it doesn't exist
+    if ! id "deploy" &>/dev/null; then
+        useradd -m -s /bin/bash deploy
+    fi
+    chown -R deploy:deploy "$PROJECT_DIR"
+fi
 
 # Build frontend
 echo "[4/7] Building frontend..."
@@ -68,11 +72,16 @@ mkdir -p "$PROJECT_DIR/logs"
 cd "$PROJECT_DIR"
 pm2 start deploy/ecosystem.config.cjs --env production
 pm2 save
-pm2 startup | tail -1 | bash || true
 
-# Setup Nginx
-echo "[7/7] Configuring Nginx..."
-sudo cp "$PROJECT_DIR/deploy/nginx.conf" /etc/nginx/sites-available/redweyne
+# Setup PM2 startup (capture and run the command)
+STARTUP_CMD=$(pm2 startup systemd -u root --hp /root | grep "sudo" | head -1)
+if [ -n "$STARTUP_CMD" ]; then
+    eval "$STARTUP_CMD" || true
+fi
+
+# Setup Nginx (HTTP only first - SSL comes after certbot)
+echo "[7/7] Configuring Nginx (HTTP only for now)..."
+sudo cp "$PROJECT_DIR/deploy/nginx-initial.conf" /etc/nginx/sites-available/redweyne
 sudo ln -sf /etc/nginx/sites-available/redweyne /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
@@ -83,10 +92,19 @@ echo "==================================="
 echo "  Deployment Complete!"
 echo "==================================="
 echo ""
-echo "Next steps:"
-echo "1. Edit $PROJECT_DIR/backend/.env with your SMTP credentials"
-echo "2. Run: sudo certbot --nginx -d redweyne.com -d www.redweyne.com"
-echo "3. Run: pm2 restart redweyne-portfolio"
+echo "IMPORTANT - Complete these steps IN ORDER:"
+echo ""
+echo "1. Edit your SMTP credentials:"
+echo "   nano $PROJECT_DIR/backend/.env"
+echo ""
+echo "2. Get SSL certificate (this will also update nginx config):"
+echo "   sudo certbot --nginx -d redweyne.com -d www.redweyne.com"
+echo ""
+echo "3. Restart the app:"
+echo "   pm2 restart redweyne-portfolio"
+echo ""
+echo "4. Verify everything works:"
+echo "   curl https://redweyne.com/api/health"
 echo ""
 echo "Useful commands:"
 echo "  pm2 logs redweyne-portfolio  - View logs"
