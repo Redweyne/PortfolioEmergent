@@ -168,8 +168,17 @@ app.add_middleware(
 TRUSTED_PROXIES = os.environ.get('TRUSTED_PROXIES', '127.0.0.1,::1').split(',')
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=TRUSTED_PROXIES)
 
+# Mount static assets (CSS, JS, images)
 if STATIC_DIR.exists() and (STATIC_DIR / "static").exists():
     app.mount("/static", StaticFiles(directory=STATIC_DIR / "static"), name="static_assets")
-    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="spa")
+    
+    # Serve index.html for client-side routing (catch-all for non-API routes)
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        """Serve React SPA for all non-API routes"""
+        index_file = STATIC_DIR / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"error": "SPA index.html not found"}
 else:
     logger.warning(f"Static files not found at {STATIC_DIR}. Run 'npm run build' in frontend directory.")
