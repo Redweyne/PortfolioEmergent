@@ -1,42 +1,74 @@
-# VPS Deployment Guide for Redweyne Portfolio
+# Portfolio Deployment Guide - redweyne.com
+
+**Your Configuration:**
+- Domain: `redweyne.com`
+- App runs on port `5000` (single unified process)
+
+---
 
 ## Prerequisites
 
-- Ubuntu 20.04+ or Debian 11+
-- Node.js 18+ and npm
+- Ubuntu 20.04+ VPS
 - Python 3.11+
+- Node.js 20+ (for building frontend)
 - Nginx
 - PM2 (`npm install -g pm2`)
 - Certbot for SSL
 
-## Step 1: Server Setup
+---
+
+## Step 1: Connect to Your VPS
 
 ```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
+ssh root@YOUR_VPS_IP
+```
 
-# Install dependencies
-sudo apt install -y nginx python3-pip python3-venv nodejs npm certbot python3-certbot-nginx
+---
 
-# Install PM2 globally
+## Step 2: Install Dependencies
+
+```bash
+# Install Node.js from NodeSource
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Install other dependencies
+sudo apt install -y nginx python3-pip python3-venv certbot python3-certbot-nginx
+
+# Install PM2
 sudo npm install -g pm2
 ```
 
-## Step 2: Clone and Setup Project
+---
+
+## Step 3: Clone and Setup Project
 
 ```bash
 # Create project directory
-sudo mkdir -p /var/www/redweyne-portfolio
+mkdir -p /var/www/redweyne-portfolio
 cd /var/www/redweyne-portfolio
 
-# Clone your repository (or upload files)
-# git clone your-repo-url .
-
-# Set ownership
-sudo chown -R $USER:$USER /var/www/redweyne-portfolio
+# Clone your repository (note the dot at the end)
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git .
 ```
 
-## Step 3: Backend Setup
+---
+
+## Step 4: Build Frontend
+
+```bash
+cd /var/www/redweyne-portfolio/frontend
+
+# Install dependencies
+npm install --legacy-peer-deps
+
+# Build static files
+npm run build
+```
+
+---
+
+## Step 5: Setup Backend
 
 ```bash
 cd /var/www/redweyne-portfolio/backend
@@ -49,83 +81,35 @@ source venv/bin/activate
 pip install -r requirements.txt
 pip install gunicorn
 
-# Create .env file
+# Create environment file
 cat > .env << EOF
 SMTP_EMAIL=your-gmail@gmail.com
 SMTP_PASSWORD=your-app-password
-RECIPIENT_EMAIL=your-email@example.com
+RECIPIENT_EMAIL=redweynemk@gmail.com
 CORS_ORIGINS=https://redweyne.com,https://www.redweyne.com
 TRUSTED_PROXIES=127.0.0.1,::1
 EOF
-
-# Test the backend
-uvicorn server:app --host 127.0.0.1 --port 8000
 ```
 
-## Step 4: Frontend Build
-
+**Edit the .env file with your actual SMTP credentials:**
 ```bash
-cd /var/www/redweyne-portfolio/frontend
-
-# Install dependencies
-npm install --legacy-peer-deps
-
-# Update API URL in your frontend config to point to your domain
-# Then build
-npm run build
+nano .env
 ```
 
-## Step 5: Nginx Configuration
+---
+
+## Step 6: Start with PM2
 
 ```bash
-# Copy nginx config
-sudo cp /var/www/redweyne-portfolio/deploy/nginx.conf /etc/nginx/sites-available/redweyne
-
-# The config is already set up for redweyne.com
-# Review and adjust if needed:
-sudo nano /etc/nginx/sites-available/redweyne
-
-# Enable the site
-sudo ln -s /etc/nginx/sites-available/redweyne /etc/nginx/sites-enabled/
-
-# Remove default site
-sudo rm /etc/nginx/sites-enabled/default
-
-# Add rate limiting zone to nginx.conf main context
-# Add this line to /etc/nginx/nginx.conf inside the http {} block:
-# limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-
-# Test nginx config
-sudo nginx -t
-
-# Reload nginx
-sudo systemctl reload nginx
-```
-
-## Step 6: SSL Certificate
-
-```bash
-# Get SSL certificate (make sure your domain points to your server first)
-sudo certbot --nginx -d redweyne.com -d www.redweyne.com
-
-# Auto-renewal is set up automatically
-```
-
-## Step 7: PM2 Process Management
-
-```bash
-# Copy ecosystem config
-cp /var/www/redweyne-portfolio/deploy/ecosystem.config.js /var/www/redweyne-portfolio/
-
-# Create log directory
-sudo mkdir -p /var/log/pm2
-sudo chown $USER:$USER /var/log/pm2
-
-# Start the backend with PM2
 cd /var/www/redweyne-portfolio
-pm2 start ecosystem.config.js
 
-# Save PM2 process list
+# Create logs directory
+mkdir -p logs
+
+# Start the application
+pm2 start deploy/ecosystem.config.cjs --env production
+
+# Save PM2 configuration
 pm2 save
 
 # Setup PM2 to start on boot
@@ -133,98 +117,104 @@ pm2 startup
 # Run the command it outputs
 ```
 
-## Step 8: Firewall Setup
+**Verify it's running:**
+```bash
+pm2 status
+curl http://localhost:5000/api/health
+```
+
+---
+
+## Step 7: Configure Nginx
 
 ```bash
-# Allow HTTP, HTTPS, and SSH
-sudo ufw allow 22
-sudo ufw allow 80
-sudo ufw allow 443
-sudo ufw enable
+# Create nginx config
+sudo nano /etc/nginx/sites-available/redweyne
 ```
+
+**Paste this configuration:**
+```nginx
+server {
+    listen 80;
+    server_name redweyne.com www.redweyne.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name redweyne.com www.redweyne.com;
+
+    ssl_certificate /etc/letsencrypt/live/redweyne.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/redweyne.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+**Enable and test:**
+```bash
+sudo ln -sf /etc/nginx/sites-available/redweyne /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+---
+
+## Step 8: Get SSL Certificate
+
+```bash
+sudo certbot --nginx -d redweyne.com -d www.redweyne.com
+```
+
+---
 
 ## Maintenance Commands
 
 ```bash
-# View backend logs
-pm2 logs redweyne-backend
+# View logs
+pm2 logs redweyne-portfolio
 
-# Restart backend
-pm2 restart redweyne-backend
+# Restart app
+pm2 restart redweyne-portfolio
 
 # Check status
 pm2 status
 
-# Update frontend
-cd /var/www/redweyne-portfolio/frontend
+# Update deployment
+cd /var/www/redweyne-portfolio
 git pull
-npm run build
-sudo systemctl reload nginx
-
-# Update backend
-cd /var/www/redweyne-portfolio/backend
-git pull
-source venv/bin/activate
-pip install -r requirements.txt
-pm2 restart redweyne-backend
+cd frontend && npm run build
+pm2 restart redweyne-portfolio
 ```
 
-## Spam Protection Features
-
-The backend includes:
-
-1. **Honeypot Fields**: Hidden form fields (`website` and `phone_confirm`) that bots fill out but humans don't see. If filled, the submission is silently accepted (returns 201) but the email is not sent. This prevents bots from detecting that they've been caught.
-
-2. **Rate Limiting**: Max 5 contact form submissions per IP per hour. Adjust `MAX_REQUESTS_PER_HOUR` in server.py if needed. The backend uses `ProxyHeadersMiddleware` to correctly identify client IPs when behind Nginx. Set `TRUSTED_PROXIES=127.0.0.1,::1` in your .env file (already configured in the setup above).
-
-3. **Nginx Rate Limiting**: 10 requests per second to API endpoints with burst of 20.
-
-## Frontend Honeypot Setup
-
-Add these hidden fields to your contact form (they should be invisible to users):
-
-```jsx
-{/* Honeypot fields - hidden from real users */}
-<input 
-  type="text" 
-  name="website" 
-  style={{ display: 'none' }} 
-  tabIndex={-1} 
-  autoComplete="off"
-/>
-<input 
-  type="text" 
-  name="phone_confirm" 
-  style={{ display: 'none' }} 
-  tabIndex={-1} 
-  autoComplete="off"
-/>
-```
+---
 
 ## Troubleshooting
 
-### Backend not starting
+**App not starting:**
 ```bash
-# Check logs
-pm2 logs redweyne-backend --lines 50
+pm2 logs redweyne-portfolio --lines 50
+```
 
-# Test manually
+**Test manually:**
+```bash
 cd /var/www/redweyne-portfolio/backend
 source venv/bin/activate
 python -c "from server import app; print('OK')"
 ```
 
-### Nginx errors
+**Nginx errors:**
 ```bash
-# Check nginx error log
 sudo tail -f /var/log/nginx/error.log
-
-# Test config
 sudo nginx -t
-```
-
-### SSL issues
-```bash
-# Renew certificate manually
-sudo certbot renew --dry-run
 ```
