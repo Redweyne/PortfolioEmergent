@@ -40,8 +40,17 @@ fi
 # Build frontend
 echo "[4/7] Building frontend..."
 cd "$PROJECT_DIR/frontend"
+if [ ! -f "package.json" ]; then
+    echo "ERROR: package.json not found! Make sure you're in the frontend directory."
+    exit 1
+fi
 npm install --legacy-peer-deps
 npm run build
+if [ ! -f "build/index.html" ]; then
+    echo "ERROR: Build failed! build/index.html not found."
+    exit 1
+fi
+echo "Frontend build successful!"
 
 # Setup backend
 echo "[5/7] Setting up backend..."

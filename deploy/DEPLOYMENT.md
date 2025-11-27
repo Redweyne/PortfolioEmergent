@@ -56,14 +56,23 @@ git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git .
 
 ## Step 4: Build Frontend
 
+**IMPORTANT: You must be in the frontend directory, NOT the root!**
+
 ```bash
+# Change to frontend directory (this is critical!)
 cd /var/www/redweyne-portfolio/frontend
+
+# Verify you're in the right place (should show package.json)
+ls package.json
 
 # Install dependencies
 npm install --legacy-peer-deps
 
 # Build static files
 npm run build
+
+# Verify build succeeded (should show index.html)
+ls build/index.html
 ```
 
 ---
