@@ -29,6 +29,14 @@ Preferred communication style: Simple, everyday language.
 - Form handling with validation for contact submissions
 - Custom hooks for toast notifications
 
+**Mobile Optimization (November 2025):**
+- MobileOrbFallback.jsx - CSS-animated orb for devices without WebGL support
+- Hero.jsx uses WebGL capability detection to show Spline 3D or fallback
+- SplineErrorBoundary catches load failures and gracefully degrades
+- All sections (Hero, About, Projects, Skills, Contact, Footer) optimized for mobile
+- Responsive text sizing, touch-friendly tap targets, mobile-specific ASCII art
+- Custom CSS animations for orb pulse, rotation, glow, and floating particles
+
 **Development Enhancements:**
 - Visual editing plugin system (babel metadata injection for element tracking)
 - Health check plugin for webpack compilation monitoring
