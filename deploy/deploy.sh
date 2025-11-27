@@ -169,7 +169,7 @@ echo "Verifying deployment..."
 sleep 2
 
 # Test health endpoint
-if curl -s http://localhost:5000/api/health | grep -q "healthy"; then
+if curl -s http://localhost:5001/api/health | grep -q "healthy"; then
     echo "✓ Backend health check passed"
 else
     echo "✗ Backend health check failed - check logs with: pm2 logs redweyne-portfolio"
