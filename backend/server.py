@@ -91,14 +91,20 @@ Reply directly to this email to respond to {name}.
         msg.attach(MIMEText(body, 'plain'))
         msg['Reply-To'] = sender_email
         
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=10) as server:
+            server.starttls(timeout=10)
             server.login(smtp_email, smtp_password)
             server.send_message(msg)
         
         logger.info(f"Email sent successfully from {sender_email}")
         return True
         
+    except smtplib.SMTPAuthenticationError as e:
+        logger.error(f"SMTP authentication failed - check email/password: {e}")
+        return False
+    except smtplib.SMTPException as e:
+        logger.error(f"SMTP error: {e}")
+        return False
     except Exception as e:
         logger.error(f"Failed to send email: {e}")
         return False
