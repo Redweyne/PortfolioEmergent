@@ -92,7 +92,7 @@ Reply directly to this email to respond to {name}.
         msg['Reply-To'] = sender_email
         
         with smtplib.SMTP('smtp.gmail.com', 587, timeout=10) as server:
-            server.starttls(timeout=10)
+            server.starttls()
             server.login(smtp_email, smtp_password)
             server.send_message(msg)
         
