@@ -138,8 +138,11 @@ pwd
 ls requirements.txt
 # MUST show: requirements.txt
 
+# Download standalone virtualenv (works even if apt has issues)
+wget https://bootstrap.pypa.io/virtualenv.pyz
+
 # Create Python virtual environment
-python3 -m venv venv
+python3 virtualenv.pyz venv
 
 # Activate virtual environment
 source venv/bin/activate
@@ -150,8 +153,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Verify gunicorn installed
-pip show gunicorn
-# Should show package info for gunicorn
+which gunicorn
+# Should show: /var/www/redweyne-portfolio/backend/venv/bin/gunicorn
 
 # Deactivate virtual environment
 deactivate
