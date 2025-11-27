@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'redweyne-portfolio',
       cwd: '/var/www/redweyne-portfolio/backend',
-      script: 'venv/bin/gunicorn',
+      script: 'gunicorn',
       args: '--bind 127.0.0.1:5000 --workers 4 --worker-class uvicorn.workers.UvicornWorker server:app',
       interpreter: 'none',
       env_production: {
