@@ -8,12 +8,9 @@
 
 ## Prerequisites
 
-- Ubuntu 20.04+ VPS
-- Python 3.11+
-- Node.js 20+ (for building frontend)
-- Nginx
-- PM2 (`npm install -g pm2`)
-- Certbot for SSL
+- Ubuntu 20.04+ VPS with at least 1GB RAM
+- Root or sudo access
+- Domain DNS already pointing to your VPS IP
 
 ---
 
@@ -25,54 +22,101 @@ ssh root@YOUR_VPS_IP
 
 ---
 
-## Step 2: Install Dependencies
+## Step 2: Install System Dependencies
 
 ```bash
-# Install Node.js from NodeSource
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js 20 from NodeSource
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 
-# Install other dependencies
-sudo apt install -y nginx python3-pip python3-venv certbot python3-certbot-nginx
+# Verify Node.js installed
+node --version
+# Should show: v20.x.x
 
-# Install PM2
+# Install other dependencies
+sudo apt install -y nginx python3-pip python3-venv certbot python3-certbot-nginx git
+
+# Install PM2 globally
 sudo npm install -g pm2
+
+# Verify PM2 installed
+pm2 --version
 ```
 
 ---
 
-## Step 3: Clone and Setup Project
+## Step 3: Clone Repository
+
+**READ THIS CAREFULLY - The dot at the end is CRITICAL!**
 
 ```bash
-# Create project directory
+# Create and enter project directory
 mkdir -p /var/www/redweyne-portfolio
 cd /var/www/redweyne-portfolio
 
-# Clone your repository (note the dot at the end)
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git .
+# Verify you're in the right directory
+pwd
+# MUST show: /var/www/redweyne-portfolio
+
+# Clone repository INTO CURRENT DIRECTORY (note the dot!)
+git clone https://github.com/Redweyne/PortfolioEmergent.git .
+#                                                          ^
+#                                                          |
+#                                            THIS DOT IS CRITICAL!
+
+# Verify the clone worked correctly
+ls -la
+# You should see: frontend/  backend/  deploy/  README.md  etc.
+```
+
+**If you forgot the dot and see a PortfolioEmergent folder instead:**
+```bash
+# Fix it by moving files up
+mv PortfolioEmergent/* .
+mv PortfolioEmergent/.* . 2>/dev/null
+rmdir PortfolioEmergent
+
+# Verify fix worked
+ls frontend/package.json
+# Should show: frontend/package.json
 ```
 
 ---
 
 ## Step 4: Build Frontend
 
-**IMPORTANT: You must be in the frontend directory, NOT the root!**
-
 ```bash
-# Change to frontend directory (this is critical!)
+# Navigate to frontend directory
 cd /var/www/redweyne-portfolio/frontend
 
-# Verify you're in the right place (should show package.json)
-ls package.json
+# Verify you're in the correct directory
+pwd
+# MUST show: /var/www/redweyne-portfolio/frontend
 
-# Install dependencies
+# Verify package.json exists
+ls package.json
+# MUST show: package.json (if not, you're in the wrong directory!)
+
+# Install dependencies (this takes a few minutes)
 npm install --legacy-peer-deps
 
-# Build static files
+# Build the production bundle (this also takes a few minutes)
 npm run build
 
-# Verify build succeeded (should show index.html)
+# Verify build succeeded
 ls build/index.html
+# MUST show: build/index.html
+```
+
+**If build fails:**
+```bash
+# Clear cache and retry
+rm -rf node_modules package-lock.json
+npm install --legacy-peer-deps
+npm run build
 ```
 
 ---
@@ -80,36 +124,73 @@ ls build/index.html
 ## Step 5: Setup Backend
 
 ```bash
+# Navigate to backend directory
 cd /var/www/redweyne-portfolio/backend
 
-# Create virtual environment
+# Verify you're in the correct directory
+pwd
+# MUST show: /var/www/redweyne-portfolio/backend
+
+# Verify requirements.txt exists
+ls requirements.txt
+# MUST show: requirements.txt
+
+# Create Python virtual environment
 python3 -m venv venv
+
+# Activate virtual environment
 source venv/bin/activate
 
-# Install dependencies (includes gunicorn)
+# Your prompt should now show (venv) at the beginning
+
+# Install Python dependencies
 pip install -r requirements.txt
 
+# Verify gunicorn installed
+pip show gunicorn
+# Should show package info for gunicorn
+
+# Deactivate virtual environment
+deactivate
+```
+
+---
+
+## Step 6: Configure Environment Variables
+
+```bash
+# Make sure you're in the backend directory
+cd /var/www/redweyne-portfolio/backend
+
 # Create environment file
-cat > .env << EOF
+cat > .env << 'EOF'
 SMTP_EMAIL=your-gmail@gmail.com
 SMTP_PASSWORD=your-app-password
 RECIPIENT_EMAIL=redweynemk@gmail.com
 CORS_ORIGINS=https://redweyne.com,https://www.redweyne.com
 TRUSTED_PROXIES=127.0.0.1,::1
 EOF
-```
 
-**Edit the .env file with your actual SMTP credentials:**
-```bash
+# Edit with your actual credentials
 nano .env
 ```
 
+**SMTP Setup (Gmail):**
+1. Go to https://myaccount.google.com/apppasswords
+2. Generate an "App Password" for "Mail"
+3. Use that 16-character password (not your regular password)
+
 ---
 
-## Step 6: Start with PM2
+## Step 7: Start Application with PM2
 
 ```bash
+# Navigate to project root
 cd /var/www/redweyne-portfolio
+
+# Verify you're in the correct directory
+pwd
+# MUST show: /var/www/redweyne-portfolio
 
 # Create logs directory
 mkdir -p logs
@@ -117,92 +198,110 @@ mkdir -p logs
 # Start the application
 pm2 start deploy/ecosystem.config.cjs --env production
 
+# Verify it's running
+pm2 status
+# Should show: redweyne-portfolio │ online
+
+# Test the API locally
+curl http://localhost:5000/api/health
+# Should return: {"status":"healthy"...}
+
+# If it's not working, check logs:
+pm2 logs redweyne-portfolio --lines 50
+
 # Save PM2 configuration
 pm2 save
 
-# Setup PM2 to start on boot
+# Setup PM2 to start on system boot
 pm2 startup
-# Run the command it outputs
-```
-
-**Verify it's running:**
-```bash
-pm2 status
-curl http://localhost:5000/api/health
+# RUN THE COMMAND IT OUTPUTS!
 ```
 
 ---
 
-## Step 7: Configure Nginx (HTTP First)
-
-**IMPORTANT:** We set up HTTP first, then add SSL with certbot.
+## Step 8: Configure Nginx
 
 ```bash
-# Copy the initial HTTP-only config
+# Copy nginx config
 sudo cp /var/www/redweyne-portfolio/deploy/nginx-initial.conf /etc/nginx/sites-available/redweyne
 
 # Enable the site
 sudo ln -sf /etc/nginx/sites-available/redweyne /etc/nginx/sites-enabled/
+
+# Remove default site
 sudo rm -f /etc/nginx/sites-enabled/default
 
-# Test and reload
+# Test nginx configuration
 sudo nginx -t
-sudo systemctl reload nginx
-```
+# MUST show: syntax is ok / test is successful
 
-**Test it works:**
-```bash
+# Reload nginx
+sudo systemctl reload nginx
+
+# Test through nginx
 curl http://localhost/api/health
 # Should return: {"status":"healthy"...}
 ```
 
 ---
 
-## Step 8: Get SSL Certificate
+## Step 9: Get SSL Certificate
 
-**Make sure your domain points to your VPS IP first!**
+**Your domain MUST already point to this VPS IP!**
 
 ```bash
-sudo certbot --nginx -d redweyne.com -d www.redweyne.com
-```
+# Verify DNS is working
+dig +short redweyne.com
+# Should show your VPS IP
 
-Certbot will automatically update your nginx config with SSL settings.
+# Get SSL certificate
+sudo certbot --nginx -d redweyne.com -d www.redweyne.com
+
+# Follow the prompts, select option to redirect HTTP to HTTPS
+
+# Verify SSL works
+curl https://redweyne.com/api/health
+# Should return: {"status":"healthy"...}
+```
 
 ---
 
-## Step 9: Verify Everything Works
+## Step 10: Final Verification
 
 ```bash
-# Test the API
-curl https://redweyne.com/api/health
-
-# Check PM2 status
+# Check everything is running
 pm2 status
+sudo systemctl status nginx
 
-# View logs if needed
-pm2 logs redweyne-portfolio
+# Test the full site
+curl -I https://redweyne.com
+# Should show: HTTP/2 200
+
+curl https://redweyne.com/api/health
+# Should return health check JSON
 ```
 
-Visit `https://redweyne.com` in your browser!
+**Visit https://redweyne.com in your browser!**
 
 ---
 
 ## Maintenance Commands
 
 ```bash
-# View logs
+# View application logs
 pm2 logs redweyne-portfolio
 
-# Restart app
+# Restart application
 pm2 restart redweyne-portfolio
 
 # Check status
 pm2 status
 
-# Update deployment
+# Update deployment (after pushing changes to GitHub)
 cd /var/www/redweyne-portfolio
 git pull
-cd frontend && npm run build
+cd frontend && npm install --legacy-peer-deps && npm run build
+cd ../backend && source venv/bin/activate && pip install -r requirements.txt && deactivate
 pm2 restart redweyne-portfolio
 ```
 
@@ -210,25 +309,45 @@ pm2 restart redweyne-portfolio
 
 ## Troubleshooting
 
-**App not starting:**
+**"No such file or directory" errors:**
 ```bash
-pm2 logs redweyne-portfolio --lines 50
+# Verify project structure
+ls /var/www/redweyne-portfolio/
+# Must contain: frontend/ backend/ deploy/
+
+# If you see PortfolioEmergent/ instead, you cloned wrong:
+cd /var/www/redweyne-portfolio
+mv PortfolioEmergent/* .
+mv PortfolioEmergent/.* . 2>/dev/null
+rmdir PortfolioEmergent
 ```
 
-**Test manually:**
+**App not starting:**
+```bash
+pm2 logs redweyne-portfolio --lines 100
+```
+
+**Test backend manually:**
 ```bash
 cd /var/www/redweyne-portfolio/backend
 source venv/bin/activate
-python -c "from server import app; print('OK')"
+python -c "from server import app; print('Server OK')"
 ```
 
 **Nginx errors:**
 ```bash
-sudo tail -f /var/log/nginx/error.log
 sudo nginx -t
+sudo tail -f /var/log/nginx/error.log
 ```
 
 **SSL certificate issues:**
 ```bash
 sudo certbot renew --dry-run
+```
+
+**Contact form not sending emails:**
+```bash
+# Check SMTP configuration
+cat /var/www/redweyne-portfolio/backend/.env
+# Verify SMTP_EMAIL and SMTP_PASSWORD are set correctly
 ```
