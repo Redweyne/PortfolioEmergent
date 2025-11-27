@@ -2,7 +2,7 @@
 
 **Your Configuration:**
 - Domain: `redweyne.com`
-- App runs on port `5001` (to avoid conflict with InboxAI on port 5000)
+- App runs on port `5002` (to avoid conflict with InboxAI on 5000 and Tempmail on 5001)
 
 ---
 
@@ -209,7 +209,7 @@ pm2 status
 # Should show: redweyne-portfolio │ online
 
 # Test the API locally
-curl http://localhost:5001/api/health
+curl http://localhost:5002/api/health
 # Should return: {"status":"healthy"...}
 
 # If it's not working, check logs:
