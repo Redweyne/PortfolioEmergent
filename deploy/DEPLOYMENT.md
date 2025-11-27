@@ -77,9 +77,8 @@ cd /var/www/redweyne-portfolio/backend
 python3 -m venv venv
 source venv/bin/activate
 
-# Install dependencies
+# Install dependencies (includes gunicorn)
 pip install -r requirements.txt
-pip install gunicorn
 
 # Create environment file
 cat > .env << EOF

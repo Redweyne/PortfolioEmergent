@@ -168,6 +168,8 @@ app.add_middleware(
 TRUSTED_PROXIES = os.environ.get('TRUSTED_PROXIES', '127.0.0.1,::1').split(',')
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=TRUSTED_PROXIES)
 
-if STATIC_DIR.exists():
+if STATIC_DIR.exists() and (STATIC_DIR / "static").exists():
     app.mount("/static", StaticFiles(directory=STATIC_DIR / "static"), name="static_assets")
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="spa")
+else:
+    logger.warning(f"Static files not found at {STATIC_DIR}. Run 'npm run build' in frontend directory.")
