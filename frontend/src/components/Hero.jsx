@@ -160,11 +160,13 @@ const Hero = () => {
         </div>
       </div>
 
-      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-        <span className="font-mono text-[10px] sm:text-xs tracking-wider text-[rgba(255,255,255,0.4)]">
-          SCROLL_DOWN
-        </span>
-        <ArrowDown className="w-4 sm:w-5 h-4 sm:h-5 text-[#00FFD1]" />
+      <div className="absolute bottom-6 sm:bottom-8 left-0 right-0 w-full flex justify-center">
+        <div className="flex flex-col items-center gap-2 animate-bounce">
+          <span className="font-mono text-[10px] sm:text-xs tracking-wider text-[rgba(255,255,255,0.4)]">
+            SCROLL_DOWN
+          </span>
+          <ArrowDown className="w-4 sm:w-5 h-4 sm:h-5 text-[#00FFD1]" />
+        </div>
       </div>
     </section>
   );

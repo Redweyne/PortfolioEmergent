@@ -92,7 +92,7 @@ export const stats = [
 ];
 
 export const socialLinks = [
-  { name: "GitHub", url: "https://github.com/redweyne", icon: "Github" },
-  { name: "LinkedIn", url: "https://linkedin.com/in/redweyne", icon: "Linkedin" },
+  { name: "GitHub", url: "https://github.com", icon: "Github" },
+  { name: "LinkedIn", url: "https://linkedin.com", icon: "Linkedin" },
   { name: "Email", url: "mailto:redweynemk@gmail.com", icon: "Mail" }
 ];
