@@ -36,6 +36,10 @@ echo "Node.js version: $(node --version)"
 echo "[3/8] Installing dependencies..."
 apt install -y nginx python3-pip python3-venv certbot python3-certbot-nginx git
 
+# Install version-specific venv for Python 3.12+
+PYTHON_VERSION=$(python3 --version | grep -oP '\d+\.\d+')
+apt install -y python${PYTHON_VERSION}-venv 2>/dev/null || true
+
 # Install PM2
 if ! command -v pm2 &> /dev/null; then
     npm install -g pm2

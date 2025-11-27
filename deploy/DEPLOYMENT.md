@@ -39,6 +39,9 @@ node --version
 # Install other dependencies
 sudo apt install -y nginx python3-pip python3-venv certbot python3-certbot-nginx git
 
+# For Python 3.12+ systems, also install the specific venv package
+sudo apt install -y python3.12-venv 2>/dev/null || sudo apt install -y python3.11-venv 2>/dev/null || true
+
 # Install PM2 globally
 sudo npm install -g pm2
 
